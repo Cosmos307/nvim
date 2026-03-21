@@ -24,7 +24,7 @@ What is Kickstart?
 
   Kickstart.nvim is *not* a distribution.
 
-  Kickstart.nvim is a starting point for your own configuration.
+  Kickstart.nvim is a starting: point for your own configuration.
     The goal is that you can read every line of code, top-to-bottom, understand
     what your configuration is doing, and modify it to suit your needs.
 
@@ -90,8 +90,12 @@ P.S. You can delete this when you're done too. It's your config now! :)
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 
+-- Set font (only works in GUI versions like Neovide, not in terminal)
+-- For terminal Neovim, set the font in your terminal emulator settings
+vim.o.guifont = 'JetBrainsMono Nerd Font:h12'
+
 -- Set to true if you have a Nerd Font installed and selected in the terminal
-vim.g.have_nerd_font = false
+vim.g.have_nerd_font = true
 
 -- [[ Setting options ]]
 -- See `:help vim.o`
@@ -100,9 +104,7 @@ vim.g.have_nerd_font = false
 
 -- Make line numbers default
 vim.o.number = true
--- You can also add relative line numbers, to help with jumping.
---  Experiment for yourself to see if you like it!
--- vim.o.relativenumber = true
+vim.o.relativenumber = true
 
 -- Enable mouse mode, can be useful for resizing splits for example!
 vim.o.mouse = 'a'
@@ -218,6 +220,16 @@ vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper win
 -- vim.keymap.set("n", "<C-S-j>", "<C-w>J", { desc = "Move window to the lower" })
 -- vim.keymap.set("n", "<C-S-k>", "<C-w>K", { desc = "Move window to the upper" })
 
+-- [[ TypeScript Tools Keymaps ]]
+-- These keymaps are available when editing TypeScript/JavaScript files
+vim.keymap.set('n', '<leader>to', '<cmd>TSToolsOrganizeImports<CR>', { desc = '[T]ypeScript [O]rganize Imports' })
+vim.keymap.set('n', '<leader>ts', '<cmd>TSToolsSortImports<CR>', { desc = '[T]ypeScript [S]ort Imports' })
+vim.keymap.set('n', '<leader>tu', '<cmd>TSToolsRemoveUnused<CR>', { desc = '[T]ypeScript Remove [U]nused' })
+vim.keymap.set('n', '<leader>ti', '<cmd>TSToolsAddMissingImports<CR>', { desc = '[T]ypeScript Add Missing [I]mports' })
+vim.keymap.set('n', '<leader>tf', '<cmd>TSToolsFixAll<CR>', { desc = '[T]ypeScript [F]ix All' })
+vim.keymap.set('n', '<leader>tr', '<cmd>TSToolsRenameFile<CR>', { desc = '[T]ypeScript [R]ename File' })
+vim.keymap.set('n', '<leader>tg', '<cmd>TSToolsGoToSourceDefinition<CR>', { desc = '[T]ypeScript [G]o to Source Definition' })
+
 -- [[ Basic Autocommands ]]
 --  See `:help lua-guide-autocommands`
 
@@ -228,6 +240,16 @@ vim.api.nvim_create_autocmd('TextYankPost', {
   desc = 'Highlight when yanking (copying) text',
   group = vim.api.nvim_create_augroup('kickstart-highlight-yank', { clear = true }),
   callback = function() vim.hl.on_yank() end,
+})
+
+-- Go: Jump to previous/next function (start of func declaration)
+vim.api.nvim_create_autocmd('FileType', {
+  pattern = 'go',
+  group = vim.api.nvim_create_augroup('kickstart-go-func-jump', { clear = true }),
+  callback = function(event)
+    vim.keymap.set('n', '[f', '?^func <CR>', { buffer = event.buf, desc = 'Go: previous function' })
+    vim.keymap.set('n', ']f', '/^func <CR>', { buffer = event.buf, desc = 'Go: next function' })
+  end,
 })
 
 -- [[ Install `lazy.nvim` plugin manager ]]
@@ -324,6 +346,16 @@ require('lazy').setup({
     },
   },
 
+  {
+    'kdheepak/lazygit.nvim',
+    dependencies = {
+      'nvim-lua/plenary.nvim',
+    },
+    keys = {
+      { '<leader>gg', '<cmd>LazyGit<cr>', desc = 'LazyGit' },
+    },
+  },
+
   -- NOTE: Plugins can specify dependencies.
   --
   -- The dependencies are proper plugin specifications as well - anything
@@ -385,17 +417,56 @@ require('lazy').setup({
       -- [[ Configure Telescope ]]
       -- See `:help telescope` and `:help telescope.setup()`
       require('telescope').setup {
-        -- You can put your default mappings / updates / etc. in here
-        --  All the info you're looking for is in `:help telescope.setup()`
-        --
-        -- defaults = {
-        --   mappings = {
-        --     i = { ['<c-enter>'] = 'to_fuzzy_refine' },
-        --   },
-        -- },
-        -- pickers = {}
+        defaults = {
+          -- Performance: Ignore these directories
+          file_ignore_patterns = {
+            'node_modules/',
+            '.git/',
+            'dist/',
+            'build/',
+            '.cache/',
+            'package%-lock%.json',
+            'yarn%.lock',
+            'pnpm%-lock%.yaml',
+            'go/pkg/mod/',
+            '.DS_Store',
+          },
+          -- Performance: Better sorting
+          layout_config = {
+            preview_cutoff = 120,
+          },
+          -- Performance: Limit preview for large files
+          preview = {
+            filesize_limit = 1, -- MB
+            timeout = 250,
+          },
+          -- Performance: Use faster grep
+          vimgrep_arguments = {
+            'rg',
+            '--color=never',
+            '--no-heading',
+            '--with-filename',
+            '--line-number',
+            '--column',
+            '--smart-case',
+            '--hidden', -- Search hidden files
+            '--glob=!.git/', -- But ignore .git
+          },
+        },
+        pickers = {
+          find_files = {
+            hidden = true, -- Show hidden files
+            follow = true, -- Follow symlinks
+          },
+        },
         extensions = {
           ['ui-select'] = { require('telescope.themes').get_dropdown() },
+          fzf = {
+            fuzzy = true,
+            override_generic_sorter = true,
+            override_file_sorter = true,
+            case_mode = 'smart_case',
+          },
         },
       }
 
@@ -595,6 +666,14 @@ require('lazy').setup({
           if client and client:supports_method('textDocument/inlayHint', event.buf) then
             map('<leader>th', function() vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled { bufnr = event.buf }) end, '[T]oggle Inlay [H]ints')
           end
+
+          -- ESLint: Auto-fix on save
+          if client and client.name == 'eslint' then
+            vim.api.nvim_create_autocmd('BufWritePre', {
+              buffer = event.buf,
+              callback = function() vim.cmd 'EslintFixAll' end,
+            })
+          end
         end,
       })
 
@@ -603,8 +682,10 @@ require('lazy').setup({
       --  See `:help lsp-config` for information about keys and how to configure
       ---@type table<string, vim.lsp.Config>
       local servers = {
+        -- Backend Languages
+        gopls = {},
+        intelephense = {},
         -- clangd = {},
-        -- gopls = {},
         -- pyright = {},
         -- rust_analyzer = {},
         --
@@ -614,7 +695,35 @@ require('lazy').setup({
         -- But for many setups, the LSP (`ts_ls`) will work just fine
         -- ts_ls = {},
 
-        stylua = {}, -- Used to format Lua code
+        -- WebApp Development LSPs
+        tailwindcss = {
+          settings = {
+            tailwindCSS = {
+              experimental = {
+                classRegex = {
+                  { 'cn\\(([^)]*)\\)', "(?:'|\"|`)([^']*)(?:'|\"|`)" },
+                  { 'clsx\\(([^)]*)\\)', "(?:'|\"|`)([^']*)(?:'|\"|`)" },
+                },
+              },
+            },
+          },
+        },
+        jsonls = {
+          settings = {
+            json = {
+              schemas = require('schemastore').json.schemas(),
+              validate = { enable = true },
+            },
+          },
+        },
+        yamlls = {},
+        html = {},
+        cssls = {},
+        eslint = {},
+        marksman = {},
+
+        -- Lua (for Neovim config)
+        -- Note: stylua is a formatter (via conform.nvim), not an LSP server
 
         -- Special Lua Config, as recommended by neovim help docs
         lua_ls = {
@@ -624,6 +733,7 @@ require('lazy').setup({
               if path ~= vim.fn.stdpath 'config' and (vim.uv.fs_stat(path .. '/.luarc.json') or vim.uv.fs_stat(path .. '/.luarc.jsonc')) then return end
             end
 
+            ---@diagnostic disable-next-line
             client.config.settings.Lua = vim.tbl_deep_extend('force', client.config.settings.Lua, {
               runtime = {
                 version = 'LuaJIT',
@@ -655,7 +765,10 @@ require('lazy').setup({
       -- You can press `g?` for help in this menu.
       local ensure_installed = vim.tbl_keys(servers or {})
       vim.list_extend(ensure_installed, {
-        -- You can add other tools here that you want Mason to install
+        -- Additional formatters and linters
+        'stylua', -- Lua formatter (not an LSP)
+        'prettier', -- JavaScript/TypeScript/CSS/HTML formatter
+        'eslint_d', -- Faster ESLint daemon
       })
 
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
@@ -792,9 +905,9 @@ require('lazy').setup({
       --
       -- By default, we use the Lua implementation instead, but you may enable
       -- the rust implementation via `'prefer_rust_with_warning'`
-      --
       -- See :h blink-cmp-config-fuzzy for more information
-      fuzzy = { implementation = 'lua' },
+      fuzzy = { implementation = 'prefer_rust_with_warning' },
+      -- fuzzy = { implementation = 'lua' },
 
       -- Shows a signature help window while you type arguments for a function
       signature = { enabled = true },
@@ -812,7 +925,7 @@ require('lazy').setup({
       ---@diagnostic disable-next-line: missing-fields
       require('tokyonight').setup {
         styles = {
-          comments = { italic = false }, -- Disable italics in comments
+          comments = { italic = true }, -- Disable italics in comments
         },
       }
 
@@ -852,6 +965,13 @@ require('lazy').setup({
       -- - sr)'  - [S]urround [R]eplace [)] [']
       require('mini.surround').setup()
 
+      -- Comment/uncomment code easily
+      --
+      -- - gcc  - Toggle comment for current line
+      -- - gc   - Toggle comment in visual mode
+      -- - gcip - Toggle comment for paragraph
+      require('mini.comment').setup()
+
       -- Simple and easy statusline.
       --  You could remove this setup call if you don't like it,
       --  and try some other statusline plugin
@@ -870,37 +990,70 @@ require('lazy').setup({
     end,
   },
 
-  { -- Highlight, edit, and navigate code
+  {
     'nvim-treesitter/nvim-treesitter',
     lazy = false,
     build = ':TSUpdate',
     branch = 'main',
-    -- [[ Configure Treesitter ]] See `:help nvim-treesitter-intro`
     config = function()
-      local parsers = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc' }
-      require('nvim-treesitter').install(parsers)
-      vim.api.nvim_create_autocmd('FileType', {
-        callback = function(args)
-          local buf, filetype = args.buf, args.match
-
-          local language = vim.treesitter.language.get_lang(filetype)
-          if not language then return end
-
-          -- check if parser exists and load it
-          if not vim.treesitter.language.add(language) then return end
-          -- enables syntax highlighting and other treesitter features
-          vim.treesitter.start(buf, language)
-
-          -- enables treesitter based folds
-          -- for more info on folds see `:help folds`
-          -- vim.wo.foldexpr = 'v:lua.vim.treesitter.foldexpr()'
-          -- vim.wo.foldmethod = 'expr'
-
-          -- enables treesitter based indentation
-          vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
-        end,
-      })
+      -- Config läuft erst, wenn das Plugin geladen ist
+      local ok, configs = pcall(require, 'nvim-treesitter.configs')
+      if not ok or not configs then
+        vim.notify('nvim-treesitter.configs not found', vim.log.levels.WARN)
+        return
+      end
+      configs.setup {
+        ensure_installed = {
+          'bash',
+          'c',
+          'diff',
+          'go',
+          'gomod',
+          'gowork',
+          'html',
+          'lua',
+          'luadoc',
+          'markdown',
+          'markdown_inline',
+          'query',
+          'vim',
+          'vimdoc',
+        },
+        highlight = { enable = true },
+        indent = { enable = true },
+      }
     end,
+  },
+  -- ts tsx typescript lsp
+  {
+    'pmizio/typescript-tools.nvim',
+    dependencies = { 'nvim-lua/plenary.nvim', 'neovim/nvim-lspconfig' },
+    ft = { 'typescript', 'typescriptreact', 'javascript', 'javascriptreact' },
+    opts = {
+      settings = {
+        separate_diagnostic_server = true,
+        publish_diagnostic_on = 'insert_leave',
+        tsserver_max_memory = 'auto',
+        complete_function_calls = true,
+        expose_as_code_action = 'all',
+        tsserver_file_preferences = {
+          includeInlayParameterNameHints = 'all',
+          includeInlayFunctionParameterTypeHints = true,
+          includeInlayVariableTypeHints = true,
+          includeInlayPropertyDeclarationTypeHints = true,
+          includeInlayFunctionLikeReturnTypeHints = true,
+          includeCompletionsForModuleExports = true,
+          quotePreference = 'auto',
+        },
+        tsserver_plugins = {
+          '@react-router/dev', -- For React Router v7 generated types
+        },
+      },
+    },
+  },
+
+  { -- JSON Schema Store for package.json, tsconfig.json validation
+    'b0o/schemastore.nvim',
   },
 
   -- The following comments only work if you have downloaded the kickstart repo, not just copy pasted the
@@ -913,11 +1066,11 @@ require('lazy').setup({
   --  Uncomment any of the lines below to enable them (you will need to restart nvim).
   --
   -- require 'kickstart.plugins.debug',
-  -- require 'kickstart.plugins.indent_line',
+  require 'kickstart.plugins.indent_line',
   -- require 'kickstart.plugins.lint',
-  -- require 'kickstart.plugins.autopairs',
-  -- require 'kickstart.plugins.neo-tree',
-  -- require 'kickstart.plugins.gitsigns', -- adds gitsigns recommend keymaps
+  require 'kickstart.plugins.autopairs',
+  require 'kickstart.plugins.neo-tree',
+  require 'kickstart.plugins.gitsigns', -- adds gitsigns recommend keymaps
 
   -- NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
   --    This is the easiest way to modularize your config.
@@ -949,6 +1102,29 @@ require('lazy').setup({
       lazy = '💤 ',
     },
   },
+})
+
+-- Treesitter highlighting (nvim-treesitter main branch)
+vim.api.nvim_create_autocmd('FileType', {
+  pattern = {
+    'bash',
+    'c',
+    'diff',
+    'go',
+    'gomod',
+    'gowork',
+    'html',
+    'lua',
+    'luadoc',
+    'markdown',
+    'markdown_inline',
+    'query',
+    'vim',
+    'vimdoc',
+  },
+  callback = function()
+    vim.treesitter.start()
+  end,
 })
 
 -- The line beneath this is called `modeline`. See `:help modeline`
