@@ -20,6 +20,7 @@ A modern, modular Neovim configuration based on [kickstart.nvim](https://github.
 - **Gitsigns**: Git integration with inline diff
 - **LazyGit**: Terminal UI for Git
 - **Which-key**: Discover keybindings
+- **Toggleterm.nvim**: Toggle integrated terminal (horizontal / vertical / float) without `:term` / `exit` friction
 - **Conform.nvim**: Auto-formatting on save
 
 ### Special Features
@@ -37,7 +38,7 @@ A modern, modular Neovim configuration based on [kickstart.nvim](https://github.
 ├── lua/
 │   ├── config/
 │   │   ├── options.lua         # Vim options (line numbers, clipboard, etc.)
-│   │   ├── keymaps.lua         # Keybindings (splits, diagnostics, TypeScript)
+│   │   ├── keymaps.lua         # Keybindings (splits, diagnostics, TypeScript, terminal)
 │   │   ├── autocmds.lua        # Autocommands (yank highlight, Treesitter)
 │   │   └── lazy.lua            # Plugin manager bootstrap
 │   ├── plugins/
@@ -48,6 +49,7 @@ A modern, modular Neovim configuration based on [kickstart.nvim](https://github.
 │   │   ├── treesitter.lua      # Syntax highlighting
 │   │   ├── lsp.lua             # LSP servers, Mason, conform.nvim
 │   │   ├── completion.lua      # Blink.cmp, LuaSnip
+│   │   ├── terminal.lua        # Toggleterm (shell toggles)
 │   │   └── typescript.lua      # TypeScript-tools, schemastore
 │   └── kickstart/
 │       └── plugins/            # Optional plugins (autopairs, neo-tree, indent-line)
@@ -114,6 +116,15 @@ Leader key: `<Space>`
 | `<leader><leader>` | Normal | Find existing buffers |
 | `<leader>/` | Normal | Fuzzy search in current buffer |
 | `<leader>sn` | Normal | Search Neovim config files |
+
+### Terminal (toggleterm.nvim)
+
+| Key | Mode | Description |
+|-----|------|-------------|
+| `<leader>tt` | Normal | Toggle terminal (horizontal split, bottom) |
+| `<leader>tv` | Normal | Toggle terminal (vertical split) |
+| `<leader>tF` | Normal | Toggle terminal (floating; capital **F** avoids clash with TypeScript `<leader>tf`) |
+| `<C-h/j/k/l>` | Terminal | Focus other windows (after `<Esc><Esc>` or while using Neovim terminal mode) |
 
 ### LSP Keymaps (when LSP is active)
 

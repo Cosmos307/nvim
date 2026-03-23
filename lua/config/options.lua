@@ -45,6 +45,9 @@ vim.o.updatetime = 250
 -- Decrease mapped sequence wait time
 vim.o.timeoutlen = 300
 
+-- Allow hidden buffers (required by toggleterm.nvim so terminals survive when closed)
+vim.o.hidden = true
+
 -- Configure how new splits should be opened
 vim.o.splitright = true
 vim.o.splitbelow = true

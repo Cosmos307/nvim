@@ -4,6 +4,20 @@ Hier kannst du wichtige oder oft genutzte Funktionen festhalten. Diese Datei ist
 
 ---
 
+## Terminal (toggleterm)
+
+| Taste | Bedeutung |
+|--------|-----------|
+| `<leader>tt` | Terminal **unten** (horizontal) ein-/ausblenden (gleiche Shell-Session bleibt) |
+| `<leader>tv` | Terminal **rechts** (vertikal) |
+| `<leader>tF` | Terminal als **schwebendes** Fenster (Großbuchstabe **F**, damit kein Konflikt mit TypeScript `<leader>tf`) |
+| `<Esc><Esc>` | Aus dem Terminal-„Einfügen“-Modus in den normalen Modus (Neovim) |
+| `<C-h>` / `<C-j>` / `<C-k>` / `<C-l>` | Im Terminal-Modus: **Fokus** zu anderen Fenstern (wie sonst auch) |
+
+**Hinweis:** Toggle blendet nur aus — die Shell läuft weiter, bis du `exit` tippst. Neo-tree: `<leader>tg` / `<leader>tS` bleiben frei (keine Kollision mit `tt`).
+
+---
+
 ## Suche & Wort unter dem Cursor
 
 | Taste | Bedeutung |
