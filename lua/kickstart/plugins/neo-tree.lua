@@ -110,7 +110,7 @@ return {
 
     close_if_last_window = true,
 
-    enable_diagnostics = false,
+    enable_diagnostics = true,
 
     -- Git: symbols next to files in the tree + dedicated git_status source (see source_selector / <leader>tg)
     enable_git_status = true,

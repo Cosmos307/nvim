@@ -6,14 +6,14 @@ A modern, modular Neovim configuration based on [kickstart.nvim](https://github.
 
 ### Language Support
 - **TypeScript/JavaScript**: Full LSP with inlay hints, auto-imports, React Router v7 support
-- **Go**: gopls with function navigation
+- **Go**: gopls with auto-imports on save (organize imports: add missing, remove unused)
 - **PHP**: intelephense
 - **Lua**: lua_ls optimized for Neovim config development
 - **Web**: Tailwind CSS, HTML, CSS, JSON (with schema validation), YAML, Markdown
 
 ### Key Plugins
 - **Telescope**: Fuzzy finder with performance optimizations
-- **Treesitter**: Advanced syntax highlighting
+- **Treesitter**: Advanced syntax highlighting + sticky context (function/class headers stay visible when scrolling)
 - **Blink.cmp**: Fast autocompletion with Rust fuzzy matcher
 - **LSP**: Full IDE features (go-to-definition, references, rename, code actions)
 - **Mini.nvim**: Text objects, surround, commenting, statusline
@@ -21,6 +21,7 @@ A modern, modular Neovim configuration based on [kickstart.nvim](https://github.
 - **LazyGit**: Terminal UI for Git
 - **Which-key**: Discover keybindings
 - **Toggleterm.nvim**: Toggle integrated terminal (horizontal / vertical / float) without `:term` / `exit` friction
+- **Workspace-diagnostics.nvim**: Project-wide LSP errors visible in Neo-tree for all files (not just open buffers)
 - **Conform.nvim**: Auto-formatting on save
 
 ### Special Features
@@ -33,28 +34,33 @@ A modern, modular Neovim configuration based on [kickstart.nvim](https://github.
 ## Directory Structure
 
 ```
-~/.config/nvim/
-├── init.lua                    # Entry point (loads all modules)
-├── lua/
-│   ├── config/
-│   │   ├── options.lua         # Vim options (line numbers, clipboard, etc.)
-│   │   ├── keymaps.lua         # Keybindings (splits, diagnostics, TypeScript, terminal)
-│   │   ├── autocmds.lua        # Autocommands (yank highlight, Treesitter)
-│   │   └── lazy.lua            # Plugin manager bootstrap
-│   ├── plugins/
-│   │   ├── ui.lua              # Colorscheme (tokyonight), which-key, statusline
-│   │   ├── editor.lua          # Mini.nvim (ai, surround, comment), todo-comments
-│   │   ├── git.lua             # Gitsigns, LazyGit
-│   │   ├── telescope.lua       # Fuzzy finder + all keymaps
-│   │   ├── treesitter.lua      # Syntax highlighting
-│   │   ├── lsp.lua             # LSP servers, Mason, conform.nvim
-│   │   ├── completion.lua      # Blink.cmp, LuaSnip
-│   │   ├── terminal.lua        # Toggleterm (shell toggles)
-│   │   └── typescript.lua      # TypeScript-tools, schemastore
-│   └── kickstart/
-│       └── plugins/            # Optional plugins (autopairs, neo-tree, indent-line)
-├── lazy-lock.json              # Plugin versions lockfile
-└── README.md                   # This file
+~/.config/
+├── nvim/                       # Neovim config
+│   ├── init.lua                # Entry point (loads all modules)
+│   ├── lua/
+│   │   ├── config/
+│   │   │   ├── options.lua     # Vim options (line numbers, clipboard, etc.)
+│   │   │   ├── keymaps.lua     # Keybindings (splits, diagnostics, TypeScript, terminal)
+│   │   │   ├── autocmds.lua    # Autocommands (yank highlight, Treesitter)
+│   │   │   └── lazy.lua        # Plugin manager bootstrap
+│   │   ├── plugins/
+│   │   │   ├── ui.lua          # Colorscheme (tokyonight), which-key, statusline
+│   │   │   ├── editor.lua      # Mini.nvim (ai, surround, comment), todo-comments
+│   │   │   ├── git.lua         # Gitsigns, LazyGit
+│   │   │   ├── telescope.lua   # Fuzzy finder + all keymaps
+│   │   │   ├── treesitter.lua  # Syntax highlighting
+│   │   │   ├── lsp.lua         # LSP servers, Mason, conform.nvim
+│   │   │   ├── completion.lua  # Blink.cmp, LuaSnip
+│   │   │   ├── terminal.lua    # Toggleterm (shell toggles)
+│   │   │   └── typescript.lua  # TypeScript-tools, schemastore
+│   │   └── kickstart/
+│   │       └── plugins/        # Optional plugins (autopairs, neo-tree, indent-line)
+│   ├── lazy-lock.json          # Plugin versions lockfile
+│   └── README.md               # This file
+├── lazygit/
+│   └── config.yml              # LazyGit config (symlinked from macOS default path)
+└── delta/
+    └── config                  # Delta theme/colors (for git diff + LazyGit)
 ```
 
 ## Installation
@@ -161,13 +167,25 @@ Leader key: `<Space>`
 | `sd"` | Normal | Delete surrounding quotes |
 | `sr)"` | Normal | Replace ) with " |
 | `<C-h/j/k/l>` | Normal | Navigate splits |
-| `<leader>gg` | Normal | Open LazyGit |
+| `[c` | Normal | Jump to context (sticky header: function/class start) |
 
 ### Git Keymaps
 
+All git commands under `<leader>g`:
+
 | Key | Mode | Description |
 |-----|------|-------------|
-| `]c` / `[c` | Normal | Next/previous git change |
+| `]g` / `[g` | Normal | Next/previous git change (hunk) |
+| `<leader>gl` | Normal | Open LazyGit |
+| `<leader>gp` | Normal | Preview hunk (popup) |
+| `<leader>gd` | Normal | Diff against index (split) |
+| `<leader>gD` | Normal | Diff against last commit |
+| `<leader>gb` | Normal | Blame line |
+| `<leader>gs` | Normal/Visual | Stage hunk |
+| `<leader>gr` | Normal/Visual | Reset hunk |
+| `<leader>gS` | Normal | Stage buffer |
+| `<leader>gR` | Normal | Reset buffer |
+| `<leader>gu` | Normal | Undo stage hunk |
 | `<leader>hs` | Normal/Visual | Stage hunk |
 | `<leader>hr` | Normal/Visual | Reset hunk |
 | `<leader>hp` | Normal | Preview hunk |

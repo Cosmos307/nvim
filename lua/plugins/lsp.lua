@@ -132,7 +132,44 @@ return {
       ---@type table<string, vim.lsp.Config>
       local servers = {
         -- Backend Languages
-        gopls = {},
+        gopls = {
+          settings = {
+            gopls = {
+              analyses = {
+                unusedparams = true,
+                shadow = true,
+              },
+              staticcheck = true,
+              gofumpt = true,
+            },
+          },
+          on_attach = function(client, bufnr)
+            -- Populate workspace diagnostics for all Go files in the project
+            require('workspace-diagnostics').populate_workspace_diagnostics(client, bufnr)
+
+            -- Auto-organize imports (add missing, remove unused) on save
+            vim.api.nvim_create_autocmd('BufWritePre', {
+              buffer = bufnr,
+              callback = function()
+                local params = vim.lsp.util.make_range_params()
+                params.context = { only = { 'source.organizeImports' } }
+                local result = vim.lsp.buf_request_sync(bufnr, 'textDocument/codeAction', params, 1000)
+                if not result or vim.tbl_isempty(result) then
+                  return
+                end
+                for _, res in pairs(result) do
+                  if res.result then
+                    for _, action in pairs(res.result) do
+                      if action.edit then
+                        vim.lsp.util.apply_workspace_edit(action.edit, client.offset_encoding)
+                      end
+                    end
+                  end
+                end
+              end,
+            })
+          end,
+        },
         intelephense = {},
         -- clangd = {},
         -- pyright = {},

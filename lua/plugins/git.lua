@@ -23,7 +23,20 @@ return {
       'nvim-lua/plenary.nvim',
     },
     keys = {
-      { '<leader>gg', '<cmd>LazyGit<cr>', desc = 'LazyGit' },
+      { '<leader>gl', '<cmd>LazyGit<cr>', desc = '[G]it [L]azyGit' },
     },
+    config = function()
+      -- Ensure delta is in PATH when LazyGit is called from Neovim
+      vim.g.lazygit_floating_window_scaling_factor = 0.9
+      
+      -- Add Homebrew bin to PATH if not already there (for delta)
+      local homebrew_bin = '/opt/homebrew/bin'
+      if vim.fn.isdirectory(homebrew_bin) == 1 then
+        local current_path = vim.env.PATH or ''
+        if not string.find(current_path, homebrew_bin, 1, true) then
+          vim.env.PATH = homebrew_bin .. ':' .. current_path
+        end
+      end
+    end,
   },
 }

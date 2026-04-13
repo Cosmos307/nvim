@@ -1,25 +1,63 @@
 -- UI Plugins: Colorscheme, Statusline, Which-key
 
 return {
-  { -- You can easily change to a different colorscheme.
-    -- Change the name of the colorscheme plugin below, and then
-    -- change the command in the config to whatever the name of that colorscheme is.
-    --
-    -- If you want to see what colorschemes are already installed, you can use `:Telescope colorscheme`.
+  -- Colorschemes: tokyonight (default) + catppuccin
+  -- Switch with :Telescope colorscheme or :colorscheme <name>
+  
+  { -- Tokyonight (default)
     'folke/tokyonight.nvim',
-    priority = 1000, -- Make sure to load this before all the other start plugins.
+    priority = 1000,
     config = function()
-      ---@diagnostic disable-next-line: missing-fields
       require('tokyonight').setup {
         styles = {
-          comments = { italic = true }, -- Disable italics in comments
+          comments = { italic = true },
+        },
+        on_highlights = function(hl, c)
+          -- Make cursor more visible in light mode
+          hl.Cursor = { fg = c.bg, bg = c.fg }
+          hl.CursorLine = { bg = c.bg_highlight }
+        end,
+      }
+      -- Load tokyonight by default (comment out to use catppuccin instead)
+      vim.cmd.colorscheme 'tokyonight-night'
+    end,
+  },
+
+  { -- Catppuccin (alternative)
+    'catppuccin/nvim',
+    name = 'catppuccin',
+    priority = 1000,
+    lazy = false,
+    config = function()
+      require('catppuccin').setup {
+        flavour = 'mocha', -- latte, frappe, macchiato, mocha
+        transparent_background = false,
+        custom_highlights = function(colors)
+          return {
+            -- Dark cursor in light mode, light cursor in dark mode
+            Cursor = { fg = colors.base, bg = colors.text },
+            CursorLine = { bg = colors.surface0 },
+          }
+        end,
+        integrations = {
+          treesitter = true,
+          telescope = { enabled = true },
+          which_key = true,
+          gitsigns = true,
+          mini = { enabled = true },
+          native_lsp = {
+            enabled = true,
+            underlines = {
+              errors = { 'undercurl' },
+              hints = { 'undercurl' },
+              warnings = { 'undercurl' },
+              information = { 'undercurl' },
+            },
+          },
         },
       }
-
-      -- Load the colorscheme here.
-      -- Like many other themes, this one has different styles, and you could load
-      -- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
-      vim.cmd.colorscheme 'tokyonight-night'
+      -- Uncomment to use catppuccin as default:
+      -- vim.cmd.colorscheme 'catppuccin'
     end,
   },
 
@@ -38,7 +76,7 @@ return {
       spec = {
         { '<leader>s', group = '[S]earch', mode = { 'n', 'v' } },
         { '<leader>t', group = '[T]oggle' },
-        { '<leader>h', group = 'Git [H]unk', mode = { 'n', 'v' } },
+        { '<leader>g', group = '[G]it', mode = { 'n', 'v' } },
         { 'gr', group = 'LSP Actions', mode = { 'n' } },
       },
     },
