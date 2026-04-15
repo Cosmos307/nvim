@@ -136,8 +136,9 @@ Leader key: `<Space>`
 
 | Key | Mode | Description |
 |-----|------|-------------|
-| `grd` | Normal | Go to Definition |
-| `grr` | Normal | Go to References |
+| `gd` | Normal | Go to Definition |
+| `gD` | Normal | Go to Declaration |
+| `gr` | Normal | Go to References |
 | `gri` | Normal | Go to Implementation |
 | `grt` | Normal | Go to Type Definition |
 | `grn` | Normal | Rename symbol |
