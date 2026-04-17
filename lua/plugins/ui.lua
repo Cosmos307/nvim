@@ -1,66 +1,7 @@
--- UI Plugins: Colorscheme, Statusline, Which-key
+-- UI Plugins: Statusline, Which-key
+-- Colorschemes are in lua/plugins/themes.lua
 
 return {
-  -- Colorschemes: tokyonight (default) + catppuccin
-  -- Switch with :Telescope colorscheme or :colorscheme <name>
-  
-  { -- Tokyonight (default)
-    'folke/tokyonight.nvim',
-    priority = 1000,
-    config = function()
-      require('tokyonight').setup {
-        styles = {
-          comments = { italic = true },
-        },
-        on_highlights = function(hl, c)
-          -- Make cursor more visible in light mode
-          hl.Cursor = { fg = c.bg, bg = c.fg }
-          hl.CursorLine = { bg = c.bg_highlight }
-        end,
-      }
-      -- Load tokyonight by default (comment out to use catppuccin instead)
-      vim.cmd.colorscheme 'tokyonight-night'
-    end,
-  },
-
-  { -- Catppuccin (alternative)
-    'catppuccin/nvim',
-    name = 'catppuccin',
-    priority = 1000,
-    lazy = false,
-    config = function()
-      require('catppuccin').setup {
-        flavour = 'mocha', -- latte, frappe, macchiato, mocha
-        transparent_background = false,
-        custom_highlights = function(colors)
-          return {
-            -- Dark cursor in light mode, light cursor in dark mode
-            Cursor = { fg = colors.base, bg = colors.text },
-            CursorLine = { bg = colors.surface0 },
-          }
-        end,
-        integrations = {
-          treesitter = true,
-          telescope = { enabled = true },
-          which_key = true,
-          gitsigns = true,
-          mini = { enabled = true },
-          native_lsp = {
-            enabled = true,
-            underlines = {
-              errors = { 'undercurl' },
-              hints = { 'undercurl' },
-              warnings = { 'undercurl' },
-              information = { 'undercurl' },
-            },
-          },
-        },
-      }
-      -- Uncomment to use catppuccin as default:
-      -- vim.cmd.colorscheme 'catppuccin'
-    end,
-  },
-
   { -- Useful plugin to show you pending keybinds.
     'folke/which-key.nvim',
     event = 'VimEnter',

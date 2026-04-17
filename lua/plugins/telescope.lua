@@ -96,6 +96,10 @@ return {
             hidden = true, -- Show hidden files
             follow = true, -- Follow symlinks
           },
+          colorscheme = {
+            ignore_builtins = true,
+            enable_preview = true, -- Live preview when scrolling through themes
+          },
         },
         extensions = {
           ['ui-select'] = { require('telescope.themes').get_dropdown() },
@@ -124,6 +128,83 @@ return {
       vim.keymap.set('n', '<leader>sr', builtin.resume, { desc = '[S]earch [R]esume' })
       vim.keymap.set('n', '<leader>s.', builtin.oldfiles, { desc = '[S]earch Recent Files ("." for repeat)' })
       vim.keymap.set('n', '<leader>sc', builtin.commands, { desc = '[S]earch [C]ommands' })
+
+      -- Custom colorscheme picker: only shows installed themes (no builtins/mini)
+      -- Add new theme prefixes here when installing new colorschemes in themes.lua
+      local installed_theme_prefixes = { 'tokyonight', 'catppuccin', 'nord', 'everforest', 'nordic', 'cyberdream', 'rose-pine', 'bluloco' }
+      local lazy_themes = { 'catppuccin', 'nord.nvim', 'everforest-nvim', 'nordic.nvim', 'rose-pine', 'bluloco.nvim' }
+
+      -- Some themes share a Lua module across variants and cache state; re-run setup before applying
+      local theme_setup = {
+        ['cyberdream']       = function() require('cyberdream').setup { variant = 'default' } end,
+        ['cyberdream-light'] = function() require('cyberdream').setup { variant = 'light' } end,
+        ['rose-pine']        = function() require('rose-pine').setup { variant = 'main' } end,
+        ['rose-pine-moon']   = function() require('rose-pine').setup { variant = 'moon' } end,
+        ['rose-pine-dawn']   = function() require('rose-pine').setup { variant = 'dawn' } end,
+        ['bluloco-dark']     = function() require('bluloco').setup { style = 'dark' } end,
+        ['bluloco-light']    = function() require('bluloco').setup { style = 'light' } end,
+      }
+      local function apply_colorscheme(name)
+        local setup = theme_setup[name]
+        if setup then setup() end
+        vim.cmd.colorscheme(name)
+      end
+
+      local light_patterns = { 'light', 'dawn', 'day', 'latte' }
+      local function is_light(name)
+        for _, p in ipairs(light_patterns) do
+          if name:match('%f[%a]' .. p .. '%f[%A]') or name:match('%-' .. p .. '$') then return true end
+        end
+        return false
+      end
+
+      local function pick_colorscheme()
+        -- Ensure lazy themes are loaded so all variants appear
+        require('lazy').load { plugins = lazy_themes }
+
+        local all = vim.fn.getcompletion('', 'color')
+        local themes = vim.tbl_filter(function(name)
+          for _, prefix in ipairs(installed_theme_prefixes) do
+            if name == prefix or name:sub(1, #prefix + 1) == prefix .. '-' then return true end
+          end
+          return false
+        end, all)
+
+        -- Dark themes first, light themes at the bottom (no more flashbangs)
+        table.sort(themes, function(a, b)
+          local al, bl = is_light(a), is_light(b)
+          if al ~= bl then return not al end
+          return a < b
+        end)
+
+        local pickers = require 'telescope.pickers'
+        local finders = require 'telescope.finders'
+        local actions = require 'telescope.actions'
+        local action_state = require 'telescope.actions.state'
+        local conf = require('telescope.config').values
+        local previewer = require('telescope.previewers').new_buffer_previewer
+
+        pickers
+          .new({}, {
+            prompt_title = 'Colorschemes',
+            finder = finders.new_table { results = themes },
+            sorter = conf.generic_sorter {},
+            previewer = previewer {
+              define_preview = function(_, entry) apply_colorscheme(entry.value) end,
+            },
+            attach_mappings = function(prompt_bufnr)
+              actions.select_default:replace(function()
+                local selection = action_state.get_selected_entry()
+                actions.close(prompt_bufnr)
+                if selection then apply_colorscheme(selection.value) end
+              end)
+              return true
+            end,
+          })
+          :find()
+      end
+
+      vim.keymap.set('n', '<leader>sC', pick_colorscheme, { desc = '[S]earch [C]olorschemes' })
       vim.keymap.set('n', '<leader><leader>', builtin.buffers, { desc = '[ ] Find existing buffers' })
 
       -- This runs on LSP attach per buffer (see main LSP attach function in 'neovim/nvim-lspconfig' config for more info,
