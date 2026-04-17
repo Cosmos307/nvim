@@ -159,6 +159,7 @@ return {
       end
 
       local function pick_colorscheme()
+        local src_buf = vim.api.nvim_get_current_buf() -- capture before telescope takes over
         -- Ensure lazy themes are loaded so all variants appear
         require('lazy').load { plugins = lazy_themes }
 
@@ -190,7 +191,13 @@ return {
             finder = finders.new_table { results = themes },
             sorter = conf.generic_sorter {},
             previewer = previewer {
-              define_preview = function(_, entry) apply_colorscheme(entry.value) end,
+              define_preview = function(self, entry)
+                apply_colorscheme(entry.value)
+                local lines = vim.api.nvim_buf_get_lines(src_buf, 0, -1, false)
+                vim.api.nvim_buf_set_lines(self.state.bufnr, 0, -1, false, lines)
+                local ft = vim.bo[src_buf].filetype
+                if ft ~= '' then vim.bo[self.state.bufnr].filetype = ft end
+              end,
             },
             attach_mappings = function(prompt_bufnr)
               actions.select_default:replace(function()

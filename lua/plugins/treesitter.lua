@@ -7,12 +7,10 @@ return {
     build = ':TSUpdate',
     branch = 'main',
     config = function()
-      -- Config läuft erst, wenn das Plugin geladen ist
+      -- nvim-treesitter main branch removed the configs module; pcall guards against this.
+      -- Highlighting still works via the FileType autocmd in config/autocmds.lua.
       local ok, configs = pcall(require, 'nvim-treesitter.configs')
-      if not ok or not configs then
-        vim.notify('nvim-treesitter.configs not found', vim.log.levels.WARN)
-        return
-      end
+      if not ok then return end
       configs.setup {
         ensure_installed = {
           'bash',
