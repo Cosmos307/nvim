@@ -139,7 +139,7 @@ Leader key: `<Space>`
 | `gd` | Normal | Go to Definition |
 | `gD` | Normal | Go to Declaration |
 | `gr` | Normal | Go to References |
-| `gri` | Normal | Go to Implementation |
+| `gi` | Normal | Go to Implementation |
 | `grt` | Normal | Go to Type Definition |
 | `grn` | Normal | Rename symbol |
 | `gra` | Normal/Visual | Code Action |
