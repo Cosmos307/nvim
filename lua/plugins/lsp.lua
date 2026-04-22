@@ -256,6 +256,8 @@ return {
         'stylua', -- Lua formatter (not an LSP)
         'prettier', -- JavaScript/TypeScript/CSS/HTML formatter
         'eslint_d', -- Faster ESLint daemon
+        -- AI (for sidekick.nvim NES feature — requires GitHub Copilot subscription)
+        'copilot-language-server',
       })
 
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
