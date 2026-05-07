@@ -136,12 +136,43 @@ return {
         gopls = {
           settings = {
             gopls = {
+              -- Static analysis
               analyses = {
-                unusedparams = true,
-                shadow = true,
+                unusedparams      = true,
+                shadow            = true,
+                unusedwrite       = true,
+                useany            = true,
+                nilness           = true,
+                unusedvariable    = true,
+                fieldalignment    = false, -- noisy, opt-in
               },
               staticcheck = true,
               gofumpt = true,
+              -- Inlay hints (toggle with <leader>th)
+              hints = {
+                assignVariableTypes      = true,
+                compositeLiteralFields   = true,
+                compositeLiteralTypes    = true,
+                constantValues           = true,
+                functionTypeParameters   = true,
+                parameterNames           = true,
+                rangeVariableTypes       = true,
+              },
+              -- Code lenses
+              codelenses = {
+                generate           = true,
+                gc_details         = true,
+                test               = true,
+                tidy               = true,
+                upgrade_dependency = true,
+                vendor             = true,
+              },
+              -- Build tags / experimental
+              buildFlags    = { '-tags=integration' },
+              completeUnimported = true,
+              usePlaceholders    = true,
+              semanticTokens     = true,
+              experimentalPostfixCompletions = true,
             },
           },
           on_attach = function(client, bufnr)
@@ -155,9 +186,7 @@ return {
                 local params = vim.lsp.util.make_range_params()
                 params.context = { only = { 'source.organizeImports' } }
                 local result = vim.lsp.buf_request_sync(bufnr, 'textDocument/codeAction', params, 1000)
-                if not result or vim.tbl_isempty(result) then
-                  return
-                end
+                if not result or vim.tbl_isempty(result) then return end
                 for _, res in pairs(result) do
                   if res.result then
                     for _, action in pairs(res.result) do
@@ -171,7 +200,60 @@ return {
             })
           end,
         },
-        intelephense = {},
+
+        intelephense = {
+          settings = {
+            intelephense = {
+              files = {
+                -- Larger files for big PHP projects (Laravel/Symfony)
+                maxSize = 5000000,
+                associations = { '*.php', '*.phtml', '*.blade.php' },
+              },
+              -- Bundled stubs cover stdlib + popular extensions/frameworks.
+              -- Edit list to match your project (saves memory).
+              stubs = {
+                'apache', 'bcmath', 'bz2', 'calendar', 'com_dotnet', 'Core',
+                'ctype', 'curl', 'date', 'dba', 'dom', 'enchant', 'exif',
+                'FFI', 'fileinfo', 'filter', 'fpm', 'ftp', 'gd', 'gettext',
+                'gmp', 'hash', 'iconv', 'imap', 'intl', 'json', 'ldap',
+                'libxml', 'mbstring', 'meta', 'mysqli', 'oci8', 'odbc',
+                'openssl', 'pcntl', 'pcre', 'PDO', 'pdo_ibm', 'pdo_mysql',
+                'pdo_pgsql', 'pdo_sqlite', 'pgsql', 'Phar', 'posix', 'pspell',
+                'readline', 'Reflection', 'session', 'shmop', 'SimpleXML',
+                'snmp', 'soap', 'sockets', 'sodium', 'SPL', 'sqlite3',
+                'standard', 'superglobals', 'sysvmsg', 'sysvsem', 'sysvshm',
+                'tidy', 'tokenizer', 'xml', 'xmlreader', 'xmlrpc', 'xmlwriter',
+                'xsl', 'Zend OPcache', 'zip', 'zlib',
+                -- Popular frameworks (uncomment what you use):
+                -- 'laravel', 'symfony', 'phpunit', 'wordpress', 'drupal',
+              },
+              environment = {
+                phpVersion = '8.3.0',
+              },
+              completion = {
+                insertUseDeclaration             = true,
+                fullyQualifyGlobalConstantsAndFunctions = false,
+                triggerParameterHints            = true,
+                maxItems                         = 100,
+              },
+              format = {
+                enable = false, -- use pint / php-cs-fixer via conform.nvim instead
+              },
+              diagnostics = {
+                enable           = true,
+                undefinedTypes   = true,
+                undefinedFunctions = true,
+                undefinedConstants = true,
+                undefinedClassConstants = true,
+                undefinedMethods = true,
+                undefinedProperties = true,
+                undefinedVariables = true,
+                unusedSymbols    = true,
+              },
+              telemetry = { enabled = false },
+            },
+          },
+        },
         -- clangd = {},
         -- pyright = {},
         -- rust_analyzer = {},
@@ -256,6 +338,14 @@ return {
         'stylua', -- Lua formatter (not an LSP)
         'prettier', -- JavaScript/TypeScript/CSS/HTML formatter
         'eslint_d', -- Faster ESLint daemon
+        -- Go tooling
+        'goimports',     -- Import management (replaces gofmt for save)
+        'gofumpt',       -- Stricter gofmt
+        'golangci-lint', -- Meta-linter (run via none-ls or :!)
+        'delve',         -- Debugger (use with nvim-dap)
+        -- PHP tooling
+        'pint',          -- Laravel Pint formatter (wraps php-cs-fixer with sane defaults)
+        'phpstan',       -- Static analysis
         -- AI (for sidekick.nvim NES feature — requires GitHub Copilot subscription)
         'copilot-language-server',
       })
@@ -310,6 +400,10 @@ return {
         json = { 'prettier' },
         yaml = { 'prettier' },
         markdown = { 'prettier' },
+        -- Go: goimports (handles imports + gofmt) → gofumpt (stricter style)
+        go = { 'goimports', 'gofumpt' },
+        -- PHP: pint (Laravel) — works on any PHP project
+        php = { 'pint' },
       },
     },
   },

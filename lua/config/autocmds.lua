@@ -3,40 +3,49 @@
 
 -- Highlight when yanking (copying) text
 --  Try it with `yap` in normal mode
---  See `:help vim.hl.on_yank()`
 vim.api.nvim_create_autocmd('TextYankPost', {
   desc = 'Highlight when yanking (copying) text',
   group = vim.api.nvim_create_augroup('kickstart-highlight-yank', { clear = true }),
   callback = function() vim.hl.on_yank() end,
 })
 
--- Go: Jump to previous/next function (start of func declaration)
+-- Treesitter highlighting (nvim-treesitter main branch)
+-- Tries to start TS for the buffer; falls back to vim's syntax highlighting if no parser.
 vim.api.nvim_create_autocmd('FileType', {
-  pattern = 'go',
-  group = vim.api.nvim_create_augroup('kickstart-go-func-jump', { clear = true }),
-  callback = function(event)
-    vim.keymap.set('n', '[f', '?^func <CR>', { buffer = event.buf, desc = 'Go: previous function' })
-    vim.keymap.set('n', ']f', '/^func <CR>', { buffer = event.buf, desc = 'Go: next function' })
+  group = vim.api.nvim_create_augroup('kickstart-ts-highlight', { clear = true }),
+  pattern = {
+    'bash', 'c', 'css', 'diff', 'go', 'gomod', 'gowork', 'html',
+    'javascript', 'javascriptreact', 'json', 'jsdoc', 'lua', 'luadoc',
+    'markdown', 'markdown_inline', 'php', 'phpdoc', 'query', 'regex',
+    'tsx', 'typescript', 'typescriptreact', 'vim', 'vimdoc', 'yaml',
+  },
+  callback = function(args)
+    local ok = pcall(vim.treesitter.start, args.buf)
+    if not ok then
+      -- Parser missing — fall back to built-in regex syntax so we still get colors
+      vim.bo[args.buf].syntax = 'on'
+    end
   end,
 })
 
--- Treesitter highlighting (nvim-treesitter main branch)
+-- PHP: tab width 4 (PSR-12 standard)
 vim.api.nvim_create_autocmd('FileType', {
-  pattern = {
-    'bash',
-    'c',
-    'diff',
-    'go',
-    'gomod',
-    'gowork',
-    'html',
-    'lua',
-    'luadoc',
-    'markdown',
-    'markdown_inline',
-    'query',
-    'vim',
-    'vimdoc',
-  },
-  callback = function() vim.treesitter.start() end,
+  pattern = 'php',
+  group = vim.api.nvim_create_augroup('kickstart-php-indent', { clear = true }),
+  callback = function()
+    vim.bo.tabstop = 4
+    vim.bo.shiftwidth = 4
+    vim.bo.expandtab = true
+  end,
+})
+
+-- Go: tabs (Go convention) + show special go file types
+vim.api.nvim_create_autocmd('FileType', {
+  pattern = 'go',
+  group = vim.api.nvim_create_augroup('kickstart-go-indent', { clear = true }),
+  callback = function()
+    vim.bo.tabstop = 4
+    vim.bo.shiftwidth = 4
+    vim.bo.expandtab = false
+  end,
 })

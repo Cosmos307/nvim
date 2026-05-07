@@ -8,8 +8,11 @@ return {
     priority = 1000,
     config = function()
       require('tokyonight').setup {
+        transparent = true,
         styles = {
           comments = { italic = true },
+          sidebars = 'transparent',
+          floats = 'transparent',
         },
         on_highlights = function(hl, c)
           hl.Cursor = { fg = c.bg, bg = c.fg }
@@ -28,7 +31,7 @@ return {
     config = function()
       require('catppuccin').setup {
         flavour = 'mocha', -- latte, frappe, macchiato, mocha
-        transparent_background = false,
+        transparent_background = true,
         custom_highlights = function(colors)
           return {
             Cursor = { fg = colors.base, bg = colors.text },
