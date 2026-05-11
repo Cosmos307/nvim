@@ -86,12 +86,3 @@ vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper win
 -- vim.keymap.set("n", "<C-S-j>", "<C-w>J", { desc = "Move window to the lower" })
 -- vim.keymap.set("n", "<C-S-k>", "<C-w>K", { desc = "Move window to the upper" })
 
--- [[ TypeScript Tools Keymaps ]]
--- These keymaps are available when editing TypeScript/JavaScript files
-vim.keymap.set('n', '<leader>to', '<cmd>TSToolsOrganizeImports<CR>', { desc = '[T]ypeScript [O]rganize Imports' })
-vim.keymap.set('n', '<leader>ts', '<cmd>TSToolsSortImports<CR>', { desc = '[T]ypeScript [S]ort Imports' })
-vim.keymap.set('n', '<leader>tu', '<cmd>TSToolsRemoveUnused<CR>', { desc = '[T]ypeScript Remove [U]nused' })
-vim.keymap.set('n', '<leader>ti', '<cmd>TSToolsAddMissingImports<CR>', { desc = '[T]ypeScript Add Missing [I]mports' })
-vim.keymap.set('n', '<leader>tf', '<cmd>TSToolsFixAll<CR>', { desc = '[T]ypeScript [F]ix All' })
-vim.keymap.set('n', '<leader>tr', '<cmd>TSToolsRenameFile<CR>', { desc = '[T]ypeScript [R]ename File' })
-vim.keymap.set('n', '<leader>tg', '<cmd>TSToolsGoToSourceDefinition<CR>', { desc = '[T]ypeScript [G]o to Source Definition' })

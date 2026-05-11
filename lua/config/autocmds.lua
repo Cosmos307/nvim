@@ -14,10 +14,10 @@ vim.api.nvim_create_autocmd('TextYankPost', {
 vim.api.nvim_create_autocmd('FileType', {
   group = vim.api.nvim_create_augroup('kickstart-ts-highlight', { clear = true }),
   pattern = {
-    'bash', 'c', 'css', 'diff', 'go', 'gomod', 'gowork', 'html',
-    'javascript', 'javascriptreact', 'json', 'jsdoc', 'lua', 'luadoc',
-    'markdown', 'markdown_inline', 'php', 'phpdoc', 'query', 'regex',
-    'tsx', 'typescript', 'typescriptreact', 'vim', 'vimdoc', 'yaml',
+    'go', 'gomod', 'gowork', 'gotmpl',
+    'php', 'phpdoc',
+    'lua', 'luadoc',
+    'vim', 'vimdoc',
   },
   callback = function(args)
     local ok = pcall(vim.treesitter.start, args.buf)

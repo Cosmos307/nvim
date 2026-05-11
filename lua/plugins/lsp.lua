@@ -117,13 +117,6 @@ return {
             map('<leader>th', function() vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled { bufnr = event.buf }) end, '[T]oggle Inlay [H]ints')
           end
 
-          -- ESLint: Auto-fix on save
-          if client and client.name == 'eslint' then
-            vim.api.nvim_create_autocmd('BufWritePre', {
-              buffer = event.buf,
-              callback = function() vim.cmd 'EslintFixAll' end,
-            })
-          end
         end,
       })
 
@@ -178,26 +171,6 @@ return {
           on_attach = function(client, bufnr)
             -- Populate workspace diagnostics for all Go files in the project
             require('workspace-diagnostics').populate_workspace_diagnostics(client, bufnr)
-
-            -- Auto-organize imports (add missing, remove unused) on save
-            vim.api.nvim_create_autocmd('BufWritePre', {
-              buffer = bufnr,
-              callback = function()
-                local params = vim.lsp.util.make_range_params()
-                params.context = { only = { 'source.organizeImports' } }
-                local result = vim.lsp.buf_request_sync(bufnr, 'textDocument/codeAction', params, 1000)
-                if not result or vim.tbl_isempty(result) then return end
-                for _, res in pairs(result) do
-                  if res.result then
-                    for _, action in pairs(res.result) do
-                      if action.edit then
-                        vim.lsp.util.apply_workspace_edit(action.edit, client.offset_encoding)
-                      end
-                    end
-                  end
-                end
-              end,
-            })
           end,
         },
 
@@ -258,39 +231,6 @@ return {
         -- pyright = {},
         -- rust_analyzer = {},
         --
-        -- Some languages (like typescript) have entire language plugins that can be useful:
-        --    https://github.com/pmizio/typescript-tools.nvim
-        --
-        -- But for many setups, the LSP (`ts_ls`) will work just fine
-        -- ts_ls = {},
-
-        -- WebApp Development LSPs
-        tailwindcss = {
-          settings = {
-            tailwindCSS = {
-              experimental = {
-                classRegex = {
-                  { 'cn\\(([^)]*)\\)', "(?:'|\"|`)([^']*)(?:'|\"|`)" },
-                  { 'clsx\\(([^)]*)\\)', "(?:'|\"|`)([^']*)(?:'|\"|`)" },
-                },
-              },
-            },
-          },
-        },
-        jsonls = {
-          settings = {
-            json = {
-              schemas = require('schemastore').json.schemas(),
-              validate = { enable = true },
-            },
-          },
-        },
-        yamlls = {},
-        html = {},
-        cssls = {},
-        eslint = {},
-        marksman = {},
-
         -- Lua (for Neovim config)
         -- Note: stylua is a formatter (via conform.nvim), not an LSP server
 
@@ -334,10 +274,8 @@ return {
       -- You can press `g?` for help in this menu.
       local ensure_installed = vim.tbl_keys(servers or {})
       vim.list_extend(ensure_installed, {
-        -- Additional formatters and linters
+        -- Additional formatter
         'stylua', -- Lua formatter (not an LSP)
-        'prettier', -- JavaScript/TypeScript/CSS/HTML formatter
-        'eslint_d', -- Faster ESLint daemon
         -- Go tooling
         'goimports',     -- Import management (replaces gofmt for save)
         'gofumpt',       -- Stricter gofmt
@@ -346,16 +284,36 @@ return {
         -- PHP tooling
         'pint',          -- Laravel Pint formatter (wraps php-cs-fixer with sane defaults)
         'phpstan',       -- Static analysis
-        -- AI (for sidekick.nvim NES feature — requires GitHub Copilot subscription)
+        -- AI tooling (used by sidekick.nvim NES)
         'copilot-language-server',
       })
 
-      require('mason-tool-installer').setup { ensure_installed = ensure_installed }
+      require('mason-tool-installer').setup {
+        ensure_installed = ensure_installed,
+        -- Avoid startup network/install work every time Neovim launches.
+        -- Run manually with :MasonToolsInstall when needed.
+        run_on_start = false,
+      }
 
       for name, server in pairs(servers) do
         vim.lsp.config(name, server)
-        vim.lsp.enable(name)
       end
+
+      -- Load language servers only when relevant filetypes are opened.
+      -- Keeps startup lighter and avoids spinning up PHP/Go LSP in non-related projects.
+      vim.lsp.enable 'lua_ls'
+
+      local ft_lsp_group = vim.api.nvim_create_augroup('kickstart-lsp-filetype-enable', { clear = true })
+      vim.api.nvim_create_autocmd('FileType', {
+        group = ft_lsp_group,
+        pattern = { 'go', 'gomod', 'gowork', 'gotmpl' },
+        callback = function() vim.lsp.enable 'gopls' end,
+      })
+      vim.api.nvim_create_autocmd('FileType', {
+        group = ft_lsp_group,
+        pattern = { 'php' },
+        callback = function() vim.lsp.enable 'intelephense' end,
+      })
     end,
   },
 
@@ -380,26 +338,20 @@ return {
         -- have a well standardized coding style. You can add additional
         -- languages here or re-enable it for the disabled ones.
         local disable_filetypes = { c = true, cpp = true }
-        if disable_filetypes[vim.bo[bufnr].filetype] then
+        local ft = vim.bo[bufnr].filetype
+        if disable_filetypes[ft] then
           return nil
         else
+          local timeout_ms = 500
+          if ft == 'go' or ft == 'php' then timeout_ms = 2000 end
           return {
-            timeout_ms = 500,
+            timeout_ms = timeout_ms,
             lsp_format = 'fallback',
           }
         end
       end,
       formatters_by_ft = {
         lua = { 'stylua' },
-        javascript = { 'prettier' },
-        javascriptreact = { 'prettier' },
-        typescript = { 'prettier' },
-        typescriptreact = { 'prettier' },
-        css = { 'prettier' },
-        html = { 'prettier' },
-        json = { 'prettier' },
-        yaml = { 'prettier' },
-        markdown = { 'prettier' },
         -- Go: goimports (handles imports + gofmt) → gofumpt (stricter style)
         go = { 'goimports', 'gofumpt' },
         -- PHP: pint (Laravel) — works on any PHP project

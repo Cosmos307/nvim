@@ -46,24 +46,24 @@ return {
     end,
     keys = {
       -- Tests
-      { '<leader>Gtt', '<cmd>GoTest<cr>',           ft = 'go', desc = '[G]o [t]est all' },
-      { '<leader>Gtf', '<cmd>GoTestFunc<cr>',       ft = 'go', desc = '[G]o [t]est [f]unction' },
-      { '<leader>Gtp', '<cmd>GoTestPkg<cr>',        ft = 'go', desc = '[G]o [t]est [p]ackage' },
-      { '<leader>Gtc', '<cmd>GoCoverage<cr>',       ft = 'go', desc = '[G]o [t]est [c]overage' },
+      { '<leader>Gtt', '<cmd>GoTest<cr>', ft = 'go', desc = '[G]o [t]est all' },
+      { '<leader>Gtf', '<cmd>GoTestFunc<cr>', ft = 'go', desc = '[G]o [t]est [f]unction' },
+      { '<leader>Gtp', '<cmd>GoTestPkg<cr>', ft = 'go', desc = '[G]o [t]est [p]ackage' },
+      { '<leader>Gtc', '<cmd>GoCoverage<cr>', ft = 'go', desc = '[G]o [t]est [c]overage' },
       -- Code generation
-      { '<leader>Gie', '<cmd>GoIfErr<cr>',          ft = 'go', desc = '[G]o [i]f [e]rr block' },
-      { '<leader>Gfs', '<cmd>GoFillStruct<cr>',     ft = 'go', desc = '[G]o [f]ill [s]truct' },
-      { '<leader>Gfw', '<cmd>GoFillSwitch<cr>',     ft = 'go', desc = '[G]o [f]ill s[w]itch' },
-      { '<leader>Gat', '<cmd>GoAddTag<cr>',         ft = 'go', desc = '[G]o [a]dd struct [t]ags' },
-      { '<leader>Grt', '<cmd>GoRmTag<cr>',          ft = 'go', desc = '[G]o [r]emove struct [t]ags' },
-      { '<leader>Gim', '<cmd>GoImpl<cr>',           ft = 'go', desc = '[G]o [im]plement interface' },
+      { '<leader>Gie', '<cmd>GoIfErr<cr>', ft = 'go', desc = '[G]o [i]f [e]rr block' },
+      { '<leader>Gfs', '<cmd>GoFillStruct<cr>', ft = 'go', desc = '[G]o [f]ill [s]truct' },
+      { '<leader>Gfw', '<cmd>GoFillSwitch<cr>', ft = 'go', desc = '[G]o [f]ill s[w]itch' },
+      { '<leader>Gat', '<cmd>GoAddTag<cr>', ft = 'go', desc = '[G]o [a]dd struct [t]ags' },
+      { '<leader>Grt', '<cmd>GoRmTag<cr>', ft = 'go', desc = '[G]o [r]emove struct [t]ags' },
+      { '<leader>Gim', '<cmd>GoImpl<cr>', ft = 'go', desc = '[G]o [im]plement interface' },
       -- Run / build
-      { '<leader>Grr', '<cmd>GoRun<cr>',            ft = 'go', desc = '[G]o [r]un' },
-      { '<leader>Grb', '<cmd>GoBuild<cr>',          ft = 'go', desc = '[G]o build' },
+      { '<leader>Grr', '<cmd>GoRun<cr>', ft = 'go', desc = '[G]o [r]un' },
+      { '<leader>Grb', '<cmd>GoBuild<cr>', ft = 'go', desc = '[G]o build' },
       -- Mod
-      { '<leader>Gmt', '<cmd>GoModTidy<cr>',        ft = 'go', desc = '[G]o [m]od [t]idy' },
+      { '<leader>Gmt', '<cmd>GoModTidy<cr>', ft = 'go', desc = '[G]o [m]od [t]idy' },
       -- Doc
-      { '<leader>Gd',  '<cmd>GoDoc<cr>',            ft = 'go', desc = '[G]o [d]oc under cursor' },
+      { '<leader>Gd', '<cmd>GoDoc<cr>', ft = 'go', desc = '[G]o [d]oc under cursor' },
     },
   },
 }

@@ -11,10 +11,11 @@ return {
       -- The old `configs.setup({ ensure_installed = ... })` is gone.
       -- Highlighting itself is enabled by the FileType autocmd in config/autocmds.lua.
       local parsers = {
-        'bash', 'c', 'css', 'diff', 'go', 'gomod', 'gowork', 'html',
-        'javascript', 'json', 'jsdoc', 'lua', 'luadoc', 'markdown',
-        'markdown_inline', 'php', 'phpdoc', 'query', 'regex', 'tsx',
-        'typescript', 'vim', 'vimdoc', 'yaml',
+        'go', 'gomod', 'gowork', 'gotmpl',
+        'php', 'phpdoc',
+        'lua', 'luadoc',
+        'vim', 'vimdoc',
+        'query', 'regex',
       }
 
       local ts = require 'nvim-treesitter'

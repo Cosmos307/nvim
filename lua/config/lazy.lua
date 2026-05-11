@@ -23,14 +23,23 @@ rtp:prepend(lazypath)
 --
 -- NOTE: Here is where you install your plugins.
 require('lazy').setup({
-  -- Load all plugin modules from lua/plugins/
-  { import = 'plugins' },
-
-  -- Load optional kickstart plugins
-  require 'kickstart.plugins.indent_line',
-  require 'kickstart.plugins.autopairs',
+  -- Focused plugin set for Go/PHP workflows
+  require 'plugins.themes',
+  require 'plugins.alpha',
+  require 'plugins.ui',
+  require 'plugins.editor',
+  require 'plugins.mini',
+  require 'plugins.git',
+  require 'plugins.terminal',
+  require 'plugins.sidekick',
+  require 'plugins.telescope',
+  require 'plugins.completion',
+  require 'plugins.treesitter',
+  require 'plugins.workspace-diagnostics',
   require 'kickstart.plugins.neo-tree',
   require 'kickstart.plugins.gitsigns',
+  require 'plugins.lsp',
+  require 'plugins.go',
 }, {
   ui = {
     -- If you are using a Nerd Font: set icons to an empty table which will use the
